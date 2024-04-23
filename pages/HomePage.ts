@@ -10,6 +10,8 @@ export class HomePage extends POMBase {
     private readonly passInput: Locator;
     private readonly passConfirmInput: Locator;
     private readonly submitButton: Locator;
+    private readonly passwordNotMatchedError: Locator;
+    private readonly captchaNotSolvedError: Locator;
 
     constructor(page: Page) {
         super(page); 
@@ -20,12 +22,18 @@ export class HomePage extends POMBase {
         this.passInput = page.locator("input[name='password']");
         this.passConfirmInput = page.locator("input[name='confirm_password']");
         this.submitButton = page.locator("input[value='Submit']");
+        this.passwordNotMatchedError = page.locator("//li[text()='Passwords do not match!']");
+        this.captchaNotSolvedError = page.locator("//li[text()='Passwords do not match!']");
     }
 
     async navigate(){
         await this.page.goto('https://qa-task.redvike.rocks/', { waitUntil: 'domcontentloaded' });
         const is_title_matched = await this.isCurrentTitleMatchedWithExpected()
         await expect(is_title_matched).toBeTruthy();
+    }
+
+    async IsPassNotMatchedErrorDisplayed(){
+        await this.passwordNotMatchedError.isVisible()
     }
 
     async inputFirstName(value: string){

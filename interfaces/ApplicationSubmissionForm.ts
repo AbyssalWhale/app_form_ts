@@ -1,0 +1,25 @@
+export interface ApplicationSubmissionForm {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    passwordConfirmed: string
+}
+
+export function getApplicationSubmissionData(
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string, 
+    passwordConfirmed?: string | null, 
+): ApplicationSubmissionForm {
+    const generatedData: ApplicationSubmissionForm = {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password,
+        passwordConfirmed: passwordConfirmed  || password,
+    };
+
+    return generatedData;
+}
