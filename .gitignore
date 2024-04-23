@@ -9,3 +9,7 @@ node_modules/
 
 # IDE specific files
 .vscode/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
