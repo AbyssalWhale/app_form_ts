@@ -2,7 +2,7 @@ import { Page } from '@playwright/test';
 
 export abstract class POMBase {
     protected page: Page;
-    abstract title_expected: string;
+    abstract titleExpected: string;
 
     constructor(page: Page) {
         this.page = page
@@ -13,7 +13,7 @@ export abstract class POMBase {
     }
 
     async isCurrentTitleMatchedWithExpected(){
-        return await this.getTitle() == this.title_expected;
+        return await this.getTitle() == this.titleExpected;
     }
 
     async closePage(){
