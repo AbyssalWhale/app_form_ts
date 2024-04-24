@@ -1,9 +1,11 @@
 import { FormSubmissionsPage } from './FormSubmissionsPage';
 import { POMBase } from './PomBase';
 import { Locator, Page, expect } from '@playwright/test';
+import * as fs from 'fs';
 
 export class HomePage extends POMBase {
     titleExpected: string;
+    private readonly avatarInput: Locator;
     private readonly firstNameInput: Locator;
     private readonly lastNameInput: Locator;
     private readonly emailNameInput: Locator;
@@ -16,6 +18,7 @@ export class HomePage extends POMBase {
     constructor(page: Page) {
         super(page); 
         this.titleExpected = 'Recruitment Task - Web Form';
+        this.avatarInput = page.locator("input[name='avatar']");
         this.firstNameInput = page.locator("input[name='first_name']");
         this.lastNameInput = page.locator("input[name='last_name']");
         this.emailNameInput = page.locator("input[name='email']");
@@ -23,7 +26,7 @@ export class HomePage extends POMBase {
         this.passConfirmInput = page.locator("input[name='confirm_password']");
         this.submitButton = page.locator("input[value='Submit']");
         this.passwordNotMatchedError = page.locator("//li[text()='Passwords do not match!']");
-        this.captchaNotSolvedError = page.locator("//li[text()='Passwords do not match!']");
+        this.captchaNotSolvedError = page.locator("//li[text()='Please solve the captcha!']");
     }
 
     async navigate(){
@@ -32,8 +35,20 @@ export class HomePage extends POMBase {
         await expect(is_title_matched).toBeTruthy();
     }
 
+    async attachAvatar(path: string){
+        if(fs.existsSync(path)){
+            await this.avatarInput.setInputFiles(path);
+        } else {
+            throw new Error(`Avatar is not found in specified path:'${path}'`);
+        }
+    }
+
+    async IsUnsolvedCaptchaErrorDisplayed(){
+        return await this.captchaNotSolvedError.isVisible()
+    }
+
     async IsPassNotMatchedErrorDisplayed(){
-        await this.passwordNotMatchedError.isVisible()
+        return await this.passwordNotMatchedError.isVisible()
     }
 
     async inputFirstName(value: string){

@@ -2,9 +2,19 @@ import { test, expect } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
 import { fa, faker } from '@faker-js/faker';
 import { ApplicationSubmissionForm, getApplicationSubmissionData } from '../interfaces/ApplicationSubmissionForm';
+import * as path from 'path';
+import * as fs from 'fs';
 
 let homePage: HomePage;
 let applicationSubmissionData: ApplicationSubmissionForm;
+let projectDirPath: string;
+let downloadDirPath: string;
+
+test.beforeAll(async({}) => {
+  projectDirPath = getRootDirectory()
+  downloadDirPath = path.join(projectDirPath, 'downloads');
+  makeDirectoryIfNotExists(downloadDirPath)
+})
 
 test.beforeEach(async ({ page }) => {
   // Arrange
@@ -17,7 +27,10 @@ test.beforeEach(async ({ page }) => {
 
   homePage = new HomePage(page)
   await homePage.navigate()
-  await expect(await homePage.getTitle(), "Page title is not macthed with expected").toBe(homePage.titleExpected);
+  await expect(
+    await homePage.getTitle(), 
+    "Page title is not macthed with expected")
+    .toBe(homePage.titleExpected);
 });
 
 test.afterAll(async() => {
@@ -31,6 +44,10 @@ test('submission is successful and the data is correctly displayed on the succes
   let formSubmissionsPage = await homePage.clickSubmit();
 
   // Assert
+  await expect(
+    await formSubmissionsPage.getTitle(), 
+    `It's expected the user was forwarded to the ${formSubmissionsPage.titleExpected} after application sumbission`)
+    .toBe(formSubmissionsPage.titleExpected);
   await expect(
       await formSubmissionsPage.isHeaderDisplayed(), 
       "Header is not displayed")
@@ -73,7 +90,7 @@ testCases.forEach((testCase, index) => {
       // Assert
       await expect(
         await homePage.getTitle(), 
-        `It's expected that application was not sumbitted and the use is still on the page: ${homePage.titleExpected}`)
+        `It's expected that application was not sumbitted and the user is still on the page: ${homePage.titleExpected}`)
         .toBe(homePage.titleExpected);
 
       if (passUnderTest === null || passConfirmedUnderTest === null) {
@@ -85,6 +102,51 @@ testCases.forEach((testCase, index) => {
   });
 });
 
+test('Application can not be submit without solved captcha', async() => {
+    // Act
+    await fillRequiredFields(applicationSubmissionData)
+    let formSubmissionsPage = await homePage.clickSubmit();
+
+    // Assert
+    await expect(
+      await homePage.getTitle(), 
+      `It's expected that application was not sumbitted and the user is still on the page: ${homePage.titleExpected}`)
+      .toBe(homePage.titleExpected);
+    
+    await expect(
+      await homePage.IsUnsolvedCaptchaErrorDisplayed(), 
+      "Expected that captcha error is displayed on the page after sumbitting application with unsolved captcha")
+      .toBeTruthy();
+});
+
+const avatarTestCase = ["avatar_large.jpg", "avatar_mid.jpg", "avatar_smal.jpg"]
+avatarTestCase.forEach((avatar, index) =>{
+  test(`${index + 1} ${avatar} can be uploaded with application form`, async () => {
+    // Arrange
+    let avatarPath = path.join(projectDirPath, 'test_data', avatar);
+
+    // Act
+    await fillRequiredFields(applicationSubmissionData)
+    await homePage.unlockSlider();
+    await homePage.attachAvatar(avatarPath)
+    let formSubmissionsPage = await homePage.clickSubmit();
+
+    // Assert
+    await expect(
+      await formSubmissionsPage.getTitle(), 
+      `It's expected the user was forwarded to the ${formSubmissionsPage.titleExpected} after application sumbission`)
+      .toBe(formSubmissionsPage.titleExpected);
+    await expect(
+      await formSubmissionsPage.isHeaderDisplayed(), 
+      "Header is not displayed")
+      .toBeTruthy();
+    await expect(
+      await formSubmissionsPage.isAvatarMatched(downloadDirPath, avatarPath), 
+      `It's expected that uploaded avatar on the page: ${formSubmissionsPage.titleExpected} is identical to submitted avatar`)
+      .toBeTruthy()
+  });
+})
+
 const fillRequiredFields = async (dataUnderTest: ApplicationSubmissionForm) => {
   await homePage.inputFirstName(dataUnderTest.firstName);
   await homePage.inputLastName(dataUnderTest.lastName);
@@ -92,3 +154,16 @@ const fillRequiredFields = async (dataUnderTest: ApplicationSubmissionForm) => {
   await homePage.inputPassword(dataUnderTest.password);
   await homePage.inputConfirmPassword(dataUnderTest.passwordConfirmed);
 };
+
+function getRootDirectory(): string {
+  return path.resolve(__dirname, '../');
+}
+
+function makeDirectoryIfNotExists(directoryPath: string): void {
+  if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
+      console.log(`Directory '${directoryPath}' created successfully.`);
+  } else {
+      console.log(`Directory '${directoryPath}' already exists.`);
+  }
+}
