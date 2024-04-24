@@ -23,7 +23,7 @@ export class HomePage extends POMBase {
         this.passConfirmInput = page.locator("input[name='confirm_password']");
         this.submitButton = page.locator("input[value='Submit']");
         this.passwordNotMatchedError = page.locator("//li[text()='Passwords do not match!']");
-        this.captchaNotSolvedError = page.locator("//li[text()='Passwords do not match!']");
+        this.captchaNotSolvedError = page.locator("//li[text()='Please solve the captcha!']");
     }
 
     async navigate(){
@@ -32,8 +32,12 @@ export class HomePage extends POMBase {
         await expect(is_title_matched).toBeTruthy();
     }
 
+    async IsUnsolvedCaptchaErrorDisplayed(){
+        return await this.captchaNotSolvedError.isVisible()
+    }
+
     async IsPassNotMatchedErrorDisplayed(){
-        await this.passwordNotMatchedError.isVisible()
+        return await this.passwordNotMatchedError.isVisible()
     }
 
     async inputFirstName(value: string){

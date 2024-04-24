@@ -73,7 +73,7 @@ testCases.forEach((testCase, index) => {
       // Assert
       await expect(
         await homePage.getTitle(), 
-        `It's expected that application was not sumbitted and the use is still on the page: ${homePage.titleExpected}`)
+        `It's expected that application was not sumbitted and the user is still on the page: ${homePage.titleExpected}`)
         .toBe(homePage.titleExpected);
 
       if (passUnderTest === null || passConfirmedUnderTest === null) {
@@ -83,6 +83,23 @@ testCases.forEach((testCase, index) => {
           .toBeTruthy()
       }
   });
+});
+
+test('Application can not be submit without solved captcha', async() => {
+    // Act
+    await fillRequiredFields(applicationSubmissionData)
+    let formSubmissionsPage = await homePage.clickSubmit();
+
+    // Assert
+    await expect(
+      await homePage.getTitle(), 
+      `It's expected that application was not sumbitted and the user is still on the page: ${homePage.titleExpected}`)
+      .toBe(homePage.titleExpected);
+    
+    await expect(
+      await homePage.IsUnsolvedCaptchaErrorDisplayed(), 
+      "Expected that captcha error is displayed on the page after sumbitting application with unsolved captcha")
+      .toBeTruthy();
 });
 
 const fillRequiredFields = async (dataUnderTest: ApplicationSubmissionForm) => {
