@@ -35,5 +35,8 @@ https://github.com/AbyssalWhale/app_form_ts/assets/53709071/703c17cd-5ba2-4b00-8
   - resolution
   - size
   - format
+ 
+# Bonus
+- A basic pipeline is added. Create a Pull Request into main branch and observe tests are being executed; 
 
 
