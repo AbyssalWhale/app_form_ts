@@ -1,3 +1,5 @@
+import { faker } from "@faker-js/faker";
+
 export interface ApplicationSubmissionForm {
     firstName: string;
     lastName: string;
@@ -22,4 +24,12 @@ export function getApplicationSubmissionData(
     };
 
     return generatedData;
+}
+
+export function getGeneratedApplicationSubmissionData(){
+    return getApplicationSubmissionData(
+        faker.person.firstName(),
+        faker.person.lastName(),
+        faker.internet.email(),
+        faker.internet.password())
 }
