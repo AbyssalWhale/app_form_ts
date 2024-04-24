@@ -1,3 +1,4 @@
+import { ApplicationSubmissionForm } from '../interfaces/ApplicationSubmissionForm';
 import { FormSubmissionsPage } from './FormSubmissionsPage';
 import { POMBase } from './PomBase';
 import { Locator, Page, expect } from '@playwright/test';
@@ -35,6 +36,20 @@ export class HomePage extends POMBase {
         await expect(is_title_matched).toBeTruthy();
     }
 
+    async fillRequiredFields(dataUnderTest: ApplicationSubmissionForm){
+        await this.firstNameInput.fill(dataUnderTest.firstName)
+        await this.lastNameInput.fill(dataUnderTest.lastName)
+        await this.emailNameInput.fill(dataUnderTest.email)
+        await this.passInput.fill(dataUnderTest.password)
+        await this.passConfirmInput.fill(dataUnderTest.passwordConfirmed)
+    }
+
+    async solveCaptchaAndClickSubmit(){
+        await this.unlockSlider();
+        await this.clickSubmit();
+        return new FormSubmissionsPage(this.page)
+    }
+
     async attachAvatar(path: string){
         if(fs.existsSync(path)){
             await this.avatarInput.setInputFiles(path);
@@ -49,26 +64,6 @@ export class HomePage extends POMBase {
 
     async IsPassNotMatchedErrorDisplayed(){
         return await this.passwordNotMatchedError.isVisible()
-    }
-
-    async inputFirstName(value: string){
-        await this.firstNameInput.fill(value)
-    }
-
-    async inputLastName(value: string){
-        await this.lastNameInput.fill(value)
-    }
-
-    async inputEmail(value: string){
-        await this.emailNameInput.fill(value)
-    }
-
-    async inputPassword(value: string){
-        await this.passInput.fill(value)
-    }
-
-    async inputConfirmPassword(value: string){
-        await this.passConfirmInput.fill(value)
     }
 
     async unlockSlider(){
