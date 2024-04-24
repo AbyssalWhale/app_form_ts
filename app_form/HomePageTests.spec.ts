@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
 import { fa, faker } from '@faker-js/faker';
 import { ApplicationSubmissionForm, getApplicationSubmissionData } from '../interfaces/ApplicationSubmissionForm';
+import * as path from 'path';
 
 let homePage: HomePage;
 let applicationSubmissionData: ApplicationSubmissionForm;
@@ -17,7 +18,10 @@ test.beforeEach(async ({ page }) => {
 
   homePage = new HomePage(page)
   await homePage.navigate()
-  await expect(await homePage.getTitle(), "Page title is not macthed with expected").toBe(homePage.titleExpected);
+  await expect(
+    await homePage.getTitle(), 
+    "Page title is not macthed with expected")
+    .toBe(homePage.titleExpected);
 });
 
 test.afterAll(async() => {
@@ -31,6 +35,10 @@ test('submission is successful and the data is correctly displayed on the succes
   let formSubmissionsPage = await homePage.clickSubmit();
 
   // Assert
+  await expect(
+    await formSubmissionsPage.getTitle(), 
+    `It's expected the user was forwarded to the ${formSubmissionsPage.titleExpected} after application sumbission`)
+    .toBe(formSubmissionsPage.titleExpected);
   await expect(
       await formSubmissionsPage.isHeaderDisplayed(), 
       "Header is not displayed")
@@ -102,6 +110,36 @@ test('Application can not be submit without solved captcha', async() => {
       .toBeTruthy();
 });
 
+const avatarTestCase = ["avatar_large.jpg", "avatar_mid.jpg", "avatar_smal.jpg"]
+avatarTestCase.forEach((avatar, index) =>{
+  test(`${index + 1} ${avatar} can be uploaded with application form`, async () => {
+    // Arrange
+    const projectPath = getRootDirectory()
+    const downloadPath = path.join(projectPath, 'downloads');
+    let avatarPath = path.join(projectPath, 'test_data', avatar);
+
+    // Act
+    await fillRequiredFields(applicationSubmissionData)
+    await homePage.unlockSlider();
+    await homePage.attachAvatar(avatarPath)
+    let formSubmissionsPage = await homePage.clickSubmit();
+
+    // Assert
+    await expect(
+      await formSubmissionsPage.getTitle(), 
+      `It's expected the user was forwarded to the ${formSubmissionsPage.titleExpected} after application sumbission`)
+      .toBe(formSubmissionsPage.titleExpected);
+    await expect(
+      await formSubmissionsPage.isHeaderDisplayed(), 
+      "Header is not displayed")
+      .toBeTruthy();
+    await expect(
+      await formSubmissionsPage.isAvatarMatched(downloadPath, avatarPath), 
+      `It's expected that uploaded avatar on the page: ${formSubmissionsPage.titleExpected} is identical to submitted avatar`)
+      .toBeTruthy()
+  });
+})
+
 const fillRequiredFields = async (dataUnderTest: ApplicationSubmissionForm) => {
   await homePage.inputFirstName(dataUnderTest.firstName);
   await homePage.inputLastName(dataUnderTest.lastName);
@@ -109,3 +147,7 @@ const fillRequiredFields = async (dataUnderTest: ApplicationSubmissionForm) => {
   await homePage.inputPassword(dataUnderTest.password);
   await homePage.inputConfirmPassword(dataUnderTest.passwordConfirmed);
 };
+
+function getRootDirectory(): string {
+  return path.resolve(__dirname, '../');
+}
