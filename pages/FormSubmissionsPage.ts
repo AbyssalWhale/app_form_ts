@@ -56,6 +56,7 @@ export class FormSubmissionsPage extends POMBase {
             await fs.writeFile(donwloadPath, fileData);
             console.log('file saved!');
         } catch (err) {
+            console.log(`error during download. Error: ${err}`);
             throw new Error(`Error during donwloading avatar. URL ${url}`);
         }
     }
