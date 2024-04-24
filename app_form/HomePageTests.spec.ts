@@ -3,9 +3,18 @@ import { HomePage } from '../pages/HomePage';
 import { fa, faker } from '@faker-js/faker';
 import { ApplicationSubmissionForm, getApplicationSubmissionData } from '../interfaces/ApplicationSubmissionForm';
 import * as path from 'path';
+import * as fs from 'fs';
 
 let homePage: HomePage;
 let applicationSubmissionData: ApplicationSubmissionForm;
+let projectDirPath: string;
+let downloadDirPath: string;
+
+test.beforeAll(async({}) => {
+  projectDirPath = getRootDirectory()
+  downloadDirPath = path.join(projectDirPath, 'downloads');
+  makeDirectoryIfNotExists(downloadDirPath)
+})
 
 test.beforeEach(async ({ page }) => {
   // Arrange
@@ -114,9 +123,7 @@ const avatarTestCase = ["avatar_large.jpg", "avatar_mid.jpg", "avatar_smal.jpg"]
 avatarTestCase.forEach((avatar, index) =>{
   test(`${index + 1} ${avatar} can be uploaded with application form`, async () => {
     // Arrange
-    const projectPath = getRootDirectory()
-    const downloadPath = path.join(projectPath, 'downloads');
-    let avatarPath = path.join(projectPath, 'test_data', avatar);
+    let avatarPath = path.join(projectDirPath, 'test_data', avatar);
 
     // Act
     await fillRequiredFields(applicationSubmissionData)
@@ -134,7 +141,7 @@ avatarTestCase.forEach((avatar, index) =>{
       "Header is not displayed")
       .toBeTruthy();
     await expect(
-      await formSubmissionsPage.isAvatarMatched(downloadPath, avatarPath), 
+      await formSubmissionsPage.isAvatarMatched(downloadDirPath, avatarPath), 
       `It's expected that uploaded avatar on the page: ${formSubmissionsPage.titleExpected} is identical to submitted avatar`)
       .toBeTruthy()
   });
@@ -150,4 +157,13 @@ const fillRequiredFields = async (dataUnderTest: ApplicationSubmissionForm) => {
 
 function getRootDirectory(): string {
   return path.resolve(__dirname, '../');
+}
+
+function makeDirectoryIfNotExists(directoryPath: string): void {
+  if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
+      console.log(`Directory '${directoryPath}' created successfully.`);
+  } else {
+      console.log(`Directory '${directoryPath}' already exists.`);
+  }
 }
