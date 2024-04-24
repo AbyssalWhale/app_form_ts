@@ -13,8 +13,9 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-    - name: Install dependencies
+    - name: Install axios
       run: npm install axios
+    - name: Install jimp
       run: npm install jimp
     - name: Install Packages
       run: npx playwright install --with-deps
