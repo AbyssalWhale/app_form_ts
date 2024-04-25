@@ -8,6 +8,7 @@
 - .github/workflows - github workflow actions
 - app_form - tests
 - interfaces - interfaces that are used by tests
+- pages - page object models
 - test_data - static tests data
 - utils - utils that are used by tests
 
